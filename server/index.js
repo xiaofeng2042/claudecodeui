@@ -130,16 +130,27 @@ async function setupProjectsWatcher() {
   }
 }
 
-// Get the first non-localhost IP address
+// Get the server IP address with public host override support
 function getServerIP() {
+  // Priority 1: Use PUBLIC_HOST environment variable if set (for public deployments)
+  if (process.env.PUBLIC_HOST) {
+    console.log('Using PUBLIC_HOST from environment:', process.env.PUBLIC_HOST);
+    return process.env.PUBLIC_HOST;
+  }
+  
+  // Priority 2: Use first non-localhost IP address (original behavior)
   const interfaces = os.networkInterfaces();
   for (const name of Object.keys(interfaces)) {
     for (const iface of interfaces[name]) {
       if (iface.family === 'IPv4' && !iface.internal) {
+        console.log('Auto-detected server IP:', iface.address);
         return iface.address;
       }
     }
   }
+  
+  // Fallback: localhost
+  console.log('Falling back to localhost');
   return 'localhost';
 }
 

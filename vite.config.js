@@ -5,16 +5,21 @@ export default defineConfig(({ command, mode }) => {
   // Load env file based on `mode` in the current working directory.
   const env = loadEnv(mode, process.cwd(), '')
   
+  // Use environment variables for API host and port
+  const apiHost = env.VITE_API_HOST || '127.0.0.1'
+  const apiPort = env.PORT || 3002
   
   return {
     plugins: [react()],
     server: {
+      host: '0.0.0.0', // Listen on all interfaces for public access
       port: parseInt(env.VITE_PORT) || 3001,
       proxy: {
-        '/api': `http://localhost:${env.PORT || 3002}`,
+        '/api': `http://${apiHost}:${apiPort}`,
         '/ws': {
-          target: `ws://localhost:${env.PORT || 3002}`,
-          ws: true
+          target: `ws://${apiHost}:${apiPort}`,
+          ws: true,
+          changeOrigin: true
         }
       }
     },
